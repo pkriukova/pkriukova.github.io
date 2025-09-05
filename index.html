@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple To-Do App</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a nicer look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Using the Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom style for completed tasks */
+        .completed {
+            text-decoration: line-through;
+            color: #9ca3af; /* gray-400 */
+        }
+        /* A little transition for smoother UI changes */
+        li {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto max-w-lg mt-12 p-6 bg-white rounded-2xl shadow-xl">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-4xl font-bold text-gray-900">My To-Do List ✅</h1>
+            <p class="text-gray-500 mt-2">Add your tasks below to stay organized.</p>
+        </div>
+
+        <!-- Form to add new tasks -->
+        <form id="todo-form" class="flex items-center gap-3 mb-6">
+            <input 
+                type="text" 
+                id="todo-input"
+                placeholder="E.g., Learn how to build web apps" 
+                class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                autocomplete="off"
+            >
+            <button 
+                type="submit" 
+                class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-transform transform hover:scale-105"
+            >
+                Add Task
+            </button>
+        </form>
+
+        <!-- The list where tasks will appear -->
+        <ul id="todo-list" class="space-y-3">
+            <!-- Tasks will be dynamically added here by JavaScript -->
+        </ul>
+
+    </div>
+
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+
+        // Get references to the essential HTML elements
+        const todoForm = document.getElementById('todo-form');
+        const todoInput = document.getElementById('todo-input');
+        const todoList = document.getElementById('todo-list');
+
+        // Listen for the form submission
+        todoForm.addEventListener('submit', function(event) {
+            // Prevent the default browser action of reloading the page
+            event.preventDefault();
+
+            // Get the text from the input, trimming any extra whitespace
+            const taskText = todoInput.value.trim();
+
+            // Only add the task if the input isn't empty
+            if (taskText !== '') {
+                addTask(taskText);
+                // Clear the input field for the next task
+                todoInput.value = '';
+                // Keep the cursor focused on the input field
+                todoInput.focus();
+            }
+        });
+
+        // Function to create and add a new task to the list
+        function addTask(text) {
+            // Create a new list item element
+            const listItem = document.createElement('li');
+            listItem.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg shadow-sm';
+
+            // Create a span to hold the task text
+            const taskSpan = document.createElement('span');
+            taskSpan.textContent = text;
+            taskSpan.className = 'flex-grow';
+
+            // Create a container for the buttons
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'flex items-center gap-2';
+            
+            // Create the "Complete" button
+            const completeButton = document.createElement('button');
+            completeButton.textContent = '✓';
+            completeButton.className = 'px-3 py-1 text-sm font-bold text-green-600 bg-green-100 rounded-full hover:bg-green-200 transition';
+            
+            // Add click event to toggle the 'completed' style
+            completeButton.addEventListener('click', function() {
+                taskSpan.classList.toggle('completed');
+                listItem.classList.toggle('bg-gray-200');
+            });
+
+            // Create the "Delete" button
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '✗';
+            deleteButton.className = 'px-3 py-1 text-sm font-bold text-red-600 bg-red-100 rounded-full hover:bg-red-200 transition';
+            
+            // Add click event to remove the task from the list
+            deleteButton.addEventListener('click', function() {
+                // Add a little animation before removing
+                listItem.classList.add('opacity-0', 'scale-90');
+                setTimeout(() => {
+                    todoList.removeChild(listItem);
+                }, 200); // Wait for animation to finish
+            });
+
+            // Assemble the new list item
+            buttonsDiv.appendChild(completeButton);
+            buttonsDiv.appendChild(deleteButton);
+            listItem.appendChild(taskSpan);
+            listItem.appendChild(buttonsDiv);
+            
+            // Add the fully assembled task to the top of the list
+            todoList.prepend(listItem);
+        }
+    </script>
+
+</body>
+</html>
