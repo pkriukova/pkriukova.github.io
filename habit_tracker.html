@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamified Habit Tracker</title>
+    <style>
+        /* --- General Styles & Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-bg: #1a1a2e;
+            --secondary-bg: #16213e;
+            --card-bg: #0f3460;
+            --text-color: #e94560;
+            --text-light: #dcdcdc;
+            --accent-color: #16c79a;
+            --disabled-color: #535353;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* --- Main App Container --- */
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--card-bg);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            color: var(--text-color);
+            font-size: 2rem;
+        }
+
+        #add-habit-btn {
+            background-color: var(--text-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        #add-habit-btn:hover {
+            transform: translateY(-2px);
+            background-color: #ff5c77;
+        }
+
+        /* --- Habit List --- */
+        #habit-list {
+            list-style-type: none;
+        }
+
+        .habit-item {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: box-shadow 0.2s ease;
+        }
+        
+        .habit-item:hover {
+            box-shadow: 0 0 15px rgba(22, 199, 154, 0.2);
+        }
+
+        .habit-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .habit-checkbox {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+        
+        .habit-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .habit-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .habit-item.completed .habit-name {
+            text-decoration: line-through;
+            color: var(--disabled-color);
+        }
+
+        .habit-streak {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+        
+        .habit-badge {
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 5px;
+            margin-left: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .habit-badge.unlocked {
+            opacity: 1;
+        }
+
+        /* --- Modal for Adding Habits --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--secondary-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-content h2 {
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        #new-habit-input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: var(--primary-bg);
+            border: 2px solid var(--card-bg);
+            border-radius: 8px;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+        
+        #new-habit-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .modal-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        #save-habit-btn {
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+        }
+
+        #cancel-btn {
+            background-color: var(--disabled-color);
+            color: var(--text-light);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+        <header>
+            <h1>HabitQuest 🎯</h1>
+            <button id="add-habit-btn">New Habit</button>
+        </header>
+        <main>
+            <ul id="habit-list">
+                </ul>
+        </main>
+    </div>
+
+    <div id="add-habit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Add a New Quest</h2>
+            <input type="text" id="new-habit-input" placeholder="e.g., Read for 15 minutes">
+            <div class="modal-actions">
+                <button id="cancel-btn" class="modal-btn">Cancel</button>
+                <button id="save-habit-btn" class="modal-btn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const habitList = document.getElementById('habit-list');
+            const addHabitBtn = document.getElementById('add-habit-btn');
+            const modal = document.getElementById('add-habit-modal');
+            const closeModalBtn = document.getElementById('cancel-btn');
+            const saveHabitBtn = document.getElementById('save-habit-btn');
+            const newHabitInput = document.getElementById('new-habit-input');
+            
+            // Load habits from localStorage or use a default array
+            let habits = JSON.parse(localStorage.getItem('habits')) || [];
+
+            // --- Modal Logic ---
+            const showModal = () => {
+                modal.classList.add('visible');
+                newHabitInput.focus();
+            };
+
+            const hideModal = () => {
+                modal.classList.remove('visible');
+                newHabitInput.value = '';
+            };
+
+            addHabitBtn.addEventListener('click', showModal);
+            closeModalBtn.addEventListener('click', hideModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    hideModal();
+                }
+            });
+
+            // --- Habit Logic ---
+            const saveHabits = () => {
+                localStorage.setItem('habits', JSON.stringify(habits));
+            };
+
+            const renderHabits = () => {
+                habitList.innerHTML = '';
+                // Get today's date in YYYY-MM-DD format
+                const today = new Date().toISOString().split('T')[0];
+
+                if (habits.length === 0) {
+                    habitList.innerHTML = `<p style="text-align:center; color: var(--disabled-color);">Your quests will appear here. Add a new one to begin!</p>`;
+                    return;
+                }
+
+                habits.forEach((habit, index) => {
+                    const isCompletedToday = habit.lastCompletedDate === today;
+
+                    const li = document.createElement('li');
+                    li.className = `habit-item ${isCompletedToday ? 'completed' : ''}`;
+                    li.dataset.index = index;
+
+                    // Simple Gamification: Badge for 7+ day streak
+                    const hasBadge = habit.streak >= 7;
+
+                    li.innerHTML = `
+                        <div class="habit-info">
+                            <input type="checkbox" class="habit-checkbox" ${isCompletedToday ? 'checked' : ''}>
+                            <div class="habit-details">
+                                <span class="habit-name">${habit.name}</span>
+                                <span class="habit-streak">🔥 Streak: ${habit.streak} days</span>
+                            </div>
+                        </div>
+                        <span class="habit-badge ${hasBadge ? 'unlocked' : ''}">🏆 Committed</span>
+                    `;
+                    habitList.appendChild(li);
+                });
+            };
+            
+            saveHabitBtn.addEventListener('click', () => {
+                const habitName = newHabitInput.value.trim();
+                if (habitName) {
+                    habits.push({
+                        name: habitName,
+                        streak: 0,
+                        lastCompletedDate: null
+                    });
+                    saveHabits();
+                    renderHabits();
+                    hideModal();
+                }
+            });
+            
+            // Handle checking/unchecking a habit
+            habitList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('habit-checkbox')) {
+                    const index = e.target.closest('.habit-item').dataset.index;
+                    const habit = habits[index];
+                    const today = new Date().toISOString().split('T')[0];
+                    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+                    if (e.target.checked) {
+                        // If last completed was yesterday, increment streak. Otherwise, reset to 1.
+                        if (habit.lastCompletedDate === yesterday) {
+                            habit.streak++;
+                        } else {
+                            habit.streak = 1;
+                        }
+                        habit.lastCompletedDate = today;
+                    } else {
+                        // Unchecking a habit completed today resets the streak
+                        habit.streak--;
+                        habit.lastCompletedDate = yesterday;
+                    }
+                    saveHabits();
+                    renderHabits();
+                }
+            });
+
+            // Initial render on page load
+            renderHabits();
+        });
+    </script>
+</body>
+</html>
